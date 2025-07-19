@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Maxwell's Python Projects - Portfolio{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Welcome to My Python Journey</h1>
+        <p class="hero-subtitle">
+            Hi! I'm <strong>Maxwell Rubert</strong>, and these are my beginner Python projects. 
+            Each project includes an interactive demo and the source code. 
+            Click on any project to try it out!
+        </p>
+        <div class="hero-stats">
+            <div class="stat">
+                <span class="stat-number">10</span>
+                <span class="stat-label">Projects</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">Interactive</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">Python</span>
+                <span class="stat-label">Powered</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="search-section">
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search projects by name or technology...">
+        </div>
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-difficulty="all">All Projects</button>
+            <button class="filter-btn" data-difficulty="Easy">Easy</button>
+            <button class="filter-btn" data-difficulty="Medium">Medium</button>
+            <button class="filter-btn" data-difficulty="Hard">Hard</button>
+        </div>
+    </div>
+</section>
+
+<!-- Projects Grid -->
+<section class="projects-section">
+    <div class="container">
+        <h2 class="section-title">My Python Projects</h2>
+        <p class="section-subtitle">From simple calculators to complex games - explore my coding journey!</p>
+        
+        <div class="projects-grid" id="projectsGrid">
+            {% for project_id, project in projects %}
+            <div class="project-card" 
+                 data-difficulty="{{ project.difficulty }}" 
+                 data-technologies="{{ project.technologies|join(' ') }}"
+                 data-title="{{ project.title }}">
+                
+                <div class="project-icon">
+                    {{ project.icon }}
+                </div>
+                
+                <div class="project-content">
+                    <h3 class="project-title">{{ project.title }}</h3>
+                    <p class="project-description">{{ project.description }}</p>
+                    
+                    <div class="project-meta">
+                        <span class="difficulty-badge difficulty-{{ project.difficulty.lower() }}">
+                            {{ project.difficulty }}
+                        </span>
+                        <div class="tech-tags">
+                            {% for tech in project.technologies %}
+                            <span class="tech-tag">{{ tech }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="project-actions">
+                    <a href="{{ url_for('project_detail', project_id=project_id) }}" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Try Demo
+                    </a>
+                    <button class="btn btn-secondary" onclick="viewCode('{{ project_id }}')">
+                        <i class="fas fa-code"></i> View Code
+                    </button>
+                </div>
+                
+                <div class="project-hover-overlay" data-project-url="{{ url_for('project_detail', project_id=project_id) }}">
+                    <div class="hover-content">
+                        <h4>{{ project.title }}</h4>
+                        <p>Interactive demo available</p>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about-section">
+    <div class="container">
+        <div class="about-content">
+            <h2>About This Portfolio</h2>
+            <p>
+                This portfolio showcases my journey learning Python programming. Each project represents 
+                a different concept or skill I've learned, from basic arithmetic operations to more complex 
+                game logic and data structures.
+            </p>
+            <div class="about-features">
+                <div class="feature">
+                    <i class="fas fa-rocket"></i>
+                    <h4>Interactive Demos</h4>
+                    <p>Try each project directly in your browser</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-code"></i>
+                    <h4>Source Code</h4>
+                    <p>View the Python code behind each project</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h4>Responsive Design</h4>
+                    <p>Works perfectly on desktop and mobile</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const projectCards = document.querySelectorAll('.project-card');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        projectCards.forEach(card => {
+            const title = card.dataset.title.toLowerCase();
+            const technologies = card.dataset.technologies.toLowerCase();
+            const description = card.querySelector('.project-description').textContent.toLowerCase();
+            
+            if (title.includes(query) || technologies.includes(query) || description.includes(query)) {
+                card.style.display = 'block';
+                card.classList.add('fade-in');
+            } else {
+                card.style.display = 'none';
+                card.classList.remove('fade-in');
+            }
+        });
+    });
+
+    // Filter functionality
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const difficulty = this.dataset.difficulty;
+            
+            projectCards.forEach(card => {
+                const cardDifficulty = card.dataset.difficulty;
+                if (difficulty === 'all' || cardDifficulty === difficulty) {
+                    card.style.display = 'block';
+                    card.classList.add('fade-in');
+                } else {
+                    card.style.display = 'none';
+                    card.classList.remove('fade-in');
+                }
+            });
+        });
+    });
+
+    // View code function - make it global
+    window.viewCode = function(projectId) {
+        // Redirect to the project page and switch to code tab
+        window.location.href = `/project/${projectId}#code`;
+    };
+
+    // Animate cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+
+    projectCards.forEach(card => {
+        observer.observe(card);
+    });
+
+    // Handle hover overlay clicks
+    document.querySelectorAll('.project-hover-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function() {
+            const url = this.dataset.projectUrl;
+            if (url) {
+                window.location.href = url;
+            }
+        });
+    });
+</script>
+{% endblock %}

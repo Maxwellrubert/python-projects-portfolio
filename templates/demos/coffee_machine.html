@@ -1,0 +1,845 @@
+<div class="coffee-machine-demo">
+    <h3>☕ Coffee Machine Simulator</h3>
+    <p>Experience running a virtual coffee shop! Manage resources, take orders, and make coffee.</p>
+    
+    <div class="machine-container">
+        <div class="machine-status" id="machineStatus">
+            <h4>☕ Maxwell's Coffee Machine</h4>
+            <div class="status-indicator">
+                <span class="status-light on" id="statusLight"></span>
+                <span>READY</span>
+            </div>
+        </div>
+        
+        <div class="resources-panel">
+            <h5>📊 Resources</h5>
+            <div class="resources-grid">
+                <div class="resource-item">
+                    <span class="resource-icon">💧</span>
+                    <div class="resource-info">
+                        <div class="resource-name">Water</div>
+                        <div class="resource-amount" id="waterAmount">300ml</div>
+                        <div class="resource-bar">
+                            <div class="resource-fill" id="waterFill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon">🥛</span>
+                    <div class="resource-info">
+                        <div class="resource-name">Milk</div>
+                        <div class="resource-amount" id="milkAmount">200ml</div>
+                        <div class="resource-bar">
+                            <div class="resource-fill" id="milkFill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon">☕</span>
+                    <div class="resource-info">
+                        <div class="resource-name">Coffee</div>
+                        <div class="resource-amount" id="coffeeAmount">100g</div>
+                        <div class="resource-bar">
+                            <div class="resource-fill" id="coffeeFill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon">💰</span>
+                    <div class="resource-info">
+                        <div class="resource-name">Money</div>
+                        <div class="resource-amount" id="moneyAmount">$0.00</div>
+                        <div class="resource-bar">
+                            <div class="resource-fill money-fill" id="moneyFill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-panel">
+            <h5>📋 Menu</h5>
+            <div class="coffee-menu">
+                <div class="coffee-option" onclick="selectCoffee('espresso')">
+                    <div class="coffee-icon">☕</div>
+                    <div class="coffee-details">
+                        <h6>Espresso</h6>
+                        <div class="coffee-requirements">
+                            <small>💧 50ml water • ☕ 18g coffee</small>
+                        </div>
+                        <div class="coffee-price">$1.50</div>
+                    </div>
+                </div>
+                <div class="coffee-option" onclick="selectCoffee('latte')">
+                    <div class="coffee-icon">🥛</div>
+                    <div class="coffee-details">
+                        <h6>Latte</h6>
+                        <div class="coffee-requirements">
+                            <small>💧 200ml water • 🥛 150ml milk • ☕ 24g coffee</small>
+                        </div>
+                        <div class="coffee-price">$2.50</div>
+                    </div>
+                </div>
+                <div class="coffee-option" onclick="selectCoffee('cappuccino')">
+                    <div class="coffee-icon">☕</div>
+                    <div class="coffee-details">
+                        <h6>Cappuccino</h6>
+                        <div class="coffee-requirements">
+                            <small>💧 250ml water • 🥛 100ml milk • ☕ 24g coffee</small>
+                        </div>
+                        <div class="coffee-price">$3.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="order-panel hidden" id="orderPanel">
+            <h5>💳 Payment</h5>
+            <div class="selected-coffee" id="selectedCoffee">
+                <span class="coffee-name">Espresso</span>
+                <span class="coffee-cost">$1.50</span>
+            </div>
+            <div class="coin-input">
+                <p>Insert coins (quarters, dimes, nickels, pennies):</p>
+                <div class="coin-buttons">
+                    <button class="coin-btn" onclick="insertCoin(0.25)">
+                        <span class="coin-value">25¢</span>
+                        <small>Quarter</small>
+                    </button>
+                    <button class="coin-btn" onclick="insertCoin(0.10)">
+                        <span class="coin-value">10¢</span>
+                        <small>Dime</small>
+                    </button>
+                    <button class="coin-btn" onclick="insertCoin(0.05)">
+                        <span class="coin-value">5¢</span>
+                        <small>Nickel</small>
+                    </button>
+                    <button class="coin-btn" onclick="insertCoin(0.01)">
+                        <span class="coin-value">1¢</span>
+                        <small>Penny</small>
+                    </button>
+                </div>
+                <div class="payment-status">
+                    <div>Inserted: <span id="insertedAmount">$0.00</span></div>
+                    <div>Needed: <span id="neededAmount">$1.50</span></div>
+                </div>
+            </div>
+            <div class="order-actions">
+                <button class="btn btn-success" onclick="processCoffee()" id="makeCoffeeBtn" disabled>
+                    <i class="fas fa-coffee"></i> Make Coffee
+                </button>
+                <button class="btn btn-secondary" onclick="cancelOrder()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+        
+        <div class="machine-output" id="machineOutput">
+            <div class="coffee-cup hidden" id="coffeeCup">
+                <span class="cup-icon">☕</span>
+                <div class="brewing-animation hidden" id="brewingAnimation">
+                    <div class="brewing-drops">
+                        <span>💧</span>
+                        <span>💧</span>
+                        <span>💧</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="machine-controls">
+            <button class="btn btn-warning" onclick="refillMachine()">
+                <i class="fas fa-fill-drip"></i> Refill Resources
+            </button>
+            <button class="btn btn-info" onclick="viewReport()">
+                <i class="fas fa-chart-bar"></i> Sales Report
+            </button>
+            <button class="btn btn-danger" onclick="powerOff()" id="powerBtn">
+                <i class="fas fa-power-off"></i> Power Off
+            </button>
+        </div>
+        
+        <div class="message-display" id="messageDisplay"></div>
+    </div>
+    
+    <div class="sales-report hidden" id="salesReport">
+        <h5>📊 Sales Report</h5>
+        <div class="report-content">
+            <div class="sales-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total Sales:</span>
+                    <span class="stat-value" id="totalSales">$0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Coffees Sold:</span>
+                    <span class="stat-value" id="coffeesSold">0</span>
+                </div>
+                <div class="stat-breakdown" id="salesBreakdown">
+                    <h6>Breakdown:</h6>
+                    <div>Espresso: <span id="espressoCount">0</span></div>
+                    <div>Latte: <span id="latteCount">0</span></div>
+                    <div>Cappuccino: <span id="cappuccinoCount">0</span></div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-secondary" onclick="closeReport()">Close Report</button>
+    </div>
+    
+    <div class="demo-info">
+        <h4>How It Works:</h4>
+        <ul>
+            <li>Select your coffee from the menu</li>
+            <li>Insert coins to pay for your order</li>
+            <li>Watch the machine check resources and brew your coffee</li>
+            <li>Manage resources - refill when running low</li>
+            <li>View sales reports to track business performance</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+let coffeeMachine = {
+    resources: {
+        water: 300,    // ml
+        milk: 200,     // ml
+        coffee: 100    // g
+    },
+    money: 0,
+    isOn: true,
+    sales: {
+        total: 0,
+        count: 0,
+        breakdown: {
+            espresso: 0,
+            latte: 0,
+            cappuccino: 0
+        }
+    },
+    currentOrder: null,
+    insertedMoney: 0
+};
+
+const coffeeRecipes = {
+    espresso: {
+        name: "Espresso",
+        icon: "☕",
+        water: 50,
+        milk: 0,
+        coffee: 18,
+        cost: 1.50
+    },
+    latte: {
+        name: "Latte", 
+        icon: "🥛",
+        water: 200,
+        milk: 150,
+        coffee: 24,
+        cost: 2.50
+    },
+    cappuccino: {
+        name: "Cappuccino",
+        icon: "☕", 
+        water: 250,
+        milk: 100,
+        coffee: 24,
+        cost: 3.00
+    }
+};
+
+function updateResourceDisplay() {
+    // Update water
+    document.getElementById('waterAmount').textContent = `${coffeeMachine.resources.water}ml`;
+    document.getElementById('waterFill').style.width = `${(coffeeMachine.resources.water / 300) * 100}%`;
+    
+    // Update milk
+    document.getElementById('milkAmount').textContent = `${coffeeMachine.resources.milk}ml`;
+    document.getElementById('milkFill').style.width = `${(coffeeMachine.resources.milk / 200) * 100}%`;
+    
+    // Update coffee
+    document.getElementById('coffeeAmount').textContent = `${coffeeMachine.resources.coffee}g`;
+    document.getElementById('coffeeFill').style.width = `${(coffeeMachine.resources.coffee / 100) * 100}%`;
+    
+    // Update money
+    document.getElementById('moneyAmount').textContent = `$${coffeeMachine.money.toFixed(2)}`;
+    document.getElementById('moneyFill').style.width = `${Math.min((coffeeMachine.money / 50) * 100, 100)}%`;
+}
+
+function selectCoffee(coffeeType) {
+    if (!coffeeMachine.isOn) {
+        showMessage("❌ Machine is powered off!", "error");
+        return;
+    }
+    
+    const recipe = coffeeRecipes[coffeeType];
+    
+    // Check if resources are sufficient
+    if (!checkResources(recipe)) {
+        return;
+    }
+    
+    coffeeMachine.currentOrder = coffeeType;
+    coffeeMachine.insertedMoney = 0;
+    
+    document.getElementById('selectedCoffee').querySelector('.coffee-name').textContent = recipe.name;
+    document.getElementById('selectedCoffee').querySelector('.coffee-cost').textContent = `$${recipe.cost.toFixed(2)}`;
+    
+    document.getElementById('insertedAmount').textContent = '$0.00';
+    document.getElementById('neededAmount').textContent = `$${recipe.cost.toFixed(2)}`;
+    
+    document.getElementById('orderPanel').classList.remove('hidden');
+    document.getElementById('makeCoffeeBtn').disabled = true;
+    
+    showMessage(`☕ ${recipe.name} selected. Please insert coins.`, "info");
+}
+
+function checkResources(recipe) {
+    const insufficient = [];
+    
+    if (coffeeMachine.resources.water < recipe.water) {
+        insufficient.push("water");
+    }
+    if (coffeeMachine.resources.milk < recipe.milk) {
+        insufficient.push("milk");
+    }
+    if (coffeeMachine.resources.coffee < recipe.coffee) {
+        insufficient.push("coffee");
+    }
+    
+    if (insufficient.length > 0) {
+        showMessage(`❌ Insufficient ${insufficient.join(", ")}. Please refill.`, "error");
+        return false;
+    }
+    
+    return true;
+}
+
+function insertCoin(value) {
+    if (!coffeeMachine.currentOrder) return;
+    
+    coffeeMachine.insertedMoney += value;
+    const recipe = coffeeRecipes[coffeeMachine.currentOrder];
+    const remaining = Math.max(0, recipe.cost - coffeeMachine.insertedMoney);
+    
+    document.getElementById('insertedAmount').textContent = `$${coffeeMachine.insertedMoney.toFixed(2)}`;
+    document.getElementById('neededAmount').textContent = `$${remaining.toFixed(2)}`;
+    
+    // Add coin insertion animation
+    showMessage(`💰 +${value.toFixed(2)}`, "success", 1000);
+    
+    if (coffeeMachine.insertedMoney >= recipe.cost) {
+        document.getElementById('makeCoffeeBtn').disabled = false;
+        document.getElementById('neededAmount').textContent = "$0.00";
+        showMessage("💳 Payment complete! Click 'Make Coffee'", "success");
+    }
+}
+
+function processCoffee() {
+    if (!coffeeMachine.currentOrder) return;
+    
+    const recipe = coffeeRecipes[coffeeMachine.currentOrder];
+    
+    if (coffeeMachine.insertedMoney < recipe.cost) {
+        showMessage("❌ Insufficient payment!", "error");
+        return;
+    }
+    
+    // Calculate change
+    const change = coffeeMachine.insertedMoney - recipe.cost;
+    
+    // Start brewing animation
+    startBrewing(recipe, change);
+}
+
+function startBrewing(recipe, change) {
+    // Hide order panel
+    document.getElementById('orderPanel').classList.add('hidden');
+    
+    // Show coffee cup and brewing animation
+    document.getElementById('coffeeCup').classList.remove('hidden');
+    document.getElementById('brewingAnimation').classList.remove('hidden');
+    
+    showMessage("☕ Brewing your coffee...", "info");
+    
+    // Simulate brewing process
+    setTimeout(() => {
+        // Deduct resources
+        coffeeMachine.resources.water -= recipe.water;
+        coffeeMachine.resources.milk -= recipe.milk;
+        coffeeMachine.resources.coffee -= recipe.coffee;
+        
+        // Add money
+        coffeeMachine.money += recipe.cost;
+        
+        // Update sales
+        coffeeMachine.sales.total += recipe.cost;
+        coffeeMachine.sales.count += 1;
+        coffeeMachine.sales.breakdown[coffeeMachine.currentOrder] += 1;
+        
+        updateResourceDisplay();
+        
+        // Hide brewing animation
+        document.getElementById('brewingAnimation').classList.add('hidden');
+        
+        // Show completion message
+        let message = `✅ ${recipe.name} ready! Enjoy your coffee!`;
+        if (change > 0) {
+            message += ` Change: $${change.toFixed(2)}`;
+        }
+        showMessage(message, "success");
+        
+        // Reset order
+        setTimeout(() => {
+            document.getElementById('coffeeCup').classList.add('hidden');
+            coffeeMachine.currentOrder = null;
+            coffeeMachine.insertedMoney = 0;
+        }, 3000);
+        
+    }, 3000);
+}
+
+function cancelOrder() {
+    if (coffeeMachine.insertedMoney > 0) {
+        showMessage(`💰 Refunded: $${coffeeMachine.insertedMoney.toFixed(2)}`, "info");
+    }
+    
+    coffeeMachine.currentOrder = null;
+    coffeeMachine.insertedMoney = 0;
+    document.getElementById('orderPanel').classList.add('hidden');
+    showMessage("🚫 Order cancelled", "info");
+}
+
+function refillMachine() {
+    coffeeMachine.resources.water = 300;
+    coffeeMachine.resources.milk = 200;
+    coffeeMachine.resources.coffee = 100;
+    
+    updateResourceDisplay();
+    showMessage("🔄 All resources refilled!", "success");
+}
+
+function viewReport() {
+    document.getElementById('salesReport').classList.remove('hidden');
+    
+    document.getElementById('totalSales').textContent = `$${coffeeMachine.sales.total.toFixed(2)}`;
+    document.getElementById('coffeesSold').textContent = coffeeMachine.sales.count;
+    document.getElementById('espressoCount').textContent = coffeeMachine.sales.breakdown.espresso;
+    document.getElementById('latteCount').textContent = coffeeMachine.sales.breakdown.latte;
+    document.getElementById('cappuccinoCount').textContent = coffeeMachine.sales.breakdown.cappuccino;
+}
+
+function closeReport() {
+    document.getElementById('salesReport').classList.add('hidden');
+}
+
+function powerOff() {
+    coffeeMachine.isOn = !coffeeMachine.isOn;
+    const powerBtn = document.getElementById('powerBtn');
+    const statusLight = document.getElementById('statusLight');
+    
+    if (coffeeMachine.isOn) {
+        powerBtn.innerHTML = '<i class="fas fa-power-off"></i> Power Off';
+        statusLight.classList.add('on');
+        statusLight.classList.remove('off');
+        statusLight.nextElementSibling.textContent = 'READY';
+        showMessage("🟢 Machine powered on", "success");
+    } else {
+        powerBtn.innerHTML = '<i class="fas fa-power-off"></i> Power On';
+        statusLight.classList.remove('on');
+        statusLight.classList.add('off');
+        statusLight.nextElementSibling.textContent = 'OFF';
+        cancelOrder();
+        showMessage("🔴 Machine powered off", "info");
+    }
+}
+
+function showMessage(message, type = "info", duration = 3000) {
+    const messageDisplay = document.getElementById('messageDisplay');
+    messageDisplay.textContent = message;
+    messageDisplay.className = `message-display ${type}`;
+    
+    setTimeout(() => {
+        messageDisplay.textContent = '';
+        messageDisplay.className = 'message-display';
+    }, duration);
+}
+
+// Initialize display
+updateResourceDisplay();
+</script>
+
+<style>
+.machine-container {
+    background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    border: 3px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 2rem;
+}
+
+.machine-status {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--primary-color);
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.status-light {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.status-light.on {
+    background-color: #22c55e;
+    box-shadow: 0 0 10px #22c55e;
+}
+
+.status-light.off {
+    background-color: #ef4444;
+    animation: none;
+}
+
+.resources-panel {
+    margin-bottom: 2rem;
+}
+
+.resources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.resource-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.resource-icon {
+    font-size: 1.5rem;
+}
+
+.resource-info {
+    flex: 1;
+}
+
+.resource-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.resource-amount {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.resource-bar {
+    height: 6px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.resource-fill {
+    height: 100%;
+    background-color: var(--success-color);
+    transition: width 0.3s ease;
+}
+
+.money-fill {
+    background-color: var(--warning-color);
+}
+
+.menu-panel {
+    margin-bottom: 2rem;
+}
+
+.coffee-menu {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.coffee-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.coffee-option:hover {
+    border-color: var(--primary-color);
+    background-color: var(--bg-secondary);
+    transform: translateY(-2px);
+}
+
+.coffee-icon {
+    font-size: 2rem;
+}
+
+.coffee-details {
+    flex: 1;
+}
+
+.coffee-details h6 {
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.coffee-requirements {
+    margin-bottom: 0.5rem;
+}
+
+.coffee-requirements small {
+    color: var(--text-secondary);
+}
+
+.coffee-price {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.125rem;
+}
+
+.order-panel {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 2px solid var(--primary-color);
+}
+
+.selected-coffee {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    padding: 0.75rem;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+}
+
+.coin-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.coin-btn {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.coin-btn:hover {
+    border-color: var(--warning-color);
+    background-color: var(--warning-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+.coin-value {
+    display: block;
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.coin-btn small {
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.payment-status {
+    display: flex;
+    justify-content: space-between;
+    margin: 1rem 0;
+    font-weight: 600;
+}
+
+.order-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.machine-output {
+    text-align: center;
+    margin: 2rem 0;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coffee-cup {
+    position: relative;
+}
+
+.cup-icon {
+    font-size: 4rem;
+    animation: bounce 0.5s ease-in-out;
+}
+
+.brewing-animation {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.brewing-drops {
+    display: flex;
+    gap: 5px;
+}
+
+.brewing-drops span {
+    font-size: 1rem;
+    animation: drop 1s infinite;
+}
+
+.brewing-drops span:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.brewing-drops span:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+.machine-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.message-display {
+    text-align: center;
+    font-weight: 600;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.message-display.success {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.message-display.error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.message-display.info {
+    background-color: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #dbeafe;
+}
+
+.sales-report {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-primary);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+    min-width: 300px;
+}
+
+.sales-stats {
+    margin-bottom: 1.5rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.stat-breakdown {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.stat-breakdown h6 {
+    margin-bottom: 0.5rem;
+}
+
+.stat-breakdown div {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+@keyframes drop {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(30px); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    .machine-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .order-actions {
+        flex-direction: column;
+    }
+    
+    .sales-report {
+        width: 90%;
+        max-width: 400px;
+    }
+}
+</style>

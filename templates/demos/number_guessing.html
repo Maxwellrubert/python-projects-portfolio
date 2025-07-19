@@ -1,0 +1,238 @@
+<div class="guessing-demo">
+    <h3>🎯 Number Guessing Game</h3>
+    <p>I'm thinking of a number between 1 and 100. Can you guess it?</p>
+    
+    <div class="game-container">
+        <div class="game-setup" id="gameSetup">
+            <h4>Choose Your Difficulty:</h4>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" onclick="startGame('easy')">
+                    <span class="difficulty-name">Easy Mode</span>
+                    <span class="difficulty-desc">10 attempts</span>
+                </button>
+                <button class="difficulty-btn" onclick="startGame('hard')">
+                    <span class="difficulty-name">Hard Mode</span>
+                    <span class="difficulty-desc">5 attempts</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="game-play hidden" id="gamePlay">
+            <div class="game-info">
+                <div class="attempts-left">
+                    <span id="attemptsText">Attempts left: </span>
+                    <span id="attemptsCount">0</span>
+                </div>
+                <div class="range-hint">Range: 1 - 100</div>
+            </div>
+            
+            <div class="guess-input">
+                <input type="number" id="guessInput" min="1" max="100" placeholder="Enter your guess...">
+                <button class="btn btn-primary" onclick="makeGuess()">
+                    <i class="fas fa-bullseye"></i> Guess!
+                </button>
+            </div>
+            
+            <div class="game-feedback">
+                <div id="feedbackMessage" class="feedback-message"></div>
+                <div id="guessHistory" class="guess-history"></div>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="resetGame()" id="resetBtn">
+                <i class="fas fa-redo"></i> New Game
+            </button>
+        </div>
+        
+        <div class="game-over hidden" id="gameOver">
+            <div class="game-result">
+                <div id="resultIcon" class="result-icon"></div>
+                <div id="resultMessage" class="result-message"></div>
+                <div id="resultDetails" class="result-details"></div>
+            </div>
+            <button class="btn btn-primary" onclick="resetGame()">
+                <i class="fas fa-play"></i> Play Again
+            </button>
+        </div>
+    </div>
+    
+    <div class="demo-info">
+        <h4>How to Play:</h4>
+        <ul>
+            <li>Choose Easy (10 attempts) or Hard (5 attempts) mode</li>
+            <li>Enter a number between 1 and 100</li>
+            <li>Get hints if your guess is too high or too low</li>
+            <li>Try to guess the number before running out of attempts!</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+let gameData = {
+    targetNumber: 0,
+    remainingChances: 0,
+    maxChances: 0,
+    guesses: [],
+    gameActive: false
+};
+
+function startGame(difficulty) {
+    fetch('/api/number-guessing', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'start',
+            difficulty: difficulty
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        gameData.targetNumber = data.target_number;
+        gameData.remainingChances = data.chances;
+        gameData.maxChances = data.max_chances;
+        gameData.guesses = [];
+        gameData.gameActive = true;
+        
+        // Update UI
+        document.getElementById('gameSetup').classList.add('hidden');
+        document.getElementById('gamePlay').classList.remove('hidden');
+        document.getElementById('gameOver').classList.add('hidden');
+        
+        document.getElementById('attemptsCount').textContent = gameData.remainingChances;
+        document.getElementById('feedbackMessage').textContent = data.message;
+        document.getElementById('guessHistory').innerHTML = '';
+        document.getElementById('guessInput').value = '';
+        document.getElementById('guessInput').focus();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error starting game. Please try again.');
+    });
+}
+
+function makeGuess() {
+    if (!gameData.gameActive) return;
+    
+    const guessInput = document.getElementById('guessInput');
+    const guess = parseInt(guessInput.value);
+    
+    if (isNaN(guess) || guess < 1 || guess > 100) {
+        alert('Please enter a valid number between 1 and 100!');
+        return;
+    }
+    
+    if (gameData.guesses.includes(guess)) {
+        alert('You already guessed that number! Try a different one.');
+        return;
+    }
+    
+    fetch('/api/number-guessing', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'guess',
+            guess: guess,
+            target_number: gameData.targetNumber,
+            remaining_chances: gameData.remainingChances
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        gameData.guesses.push(guess);
+        updateGuessHistory(guess, data);
+        
+        document.getElementById('feedbackMessage').textContent = data.message;
+        
+        if (data.game_over) {
+            endGame(data.correct);
+        } else {
+            gameData.remainingChances = data.remaining_chances;
+            document.getElementById('attemptsCount').textContent = gameData.remainingChances;
+        }
+        
+        guessInput.value = '';
+        guessInput.focus();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error making guess. Please try again.');
+    });
+}
+
+function updateGuessHistory(guess, result) {
+    const historyDiv = document.getElementById('guessHistory');
+    const guessElement = document.createElement('div');
+    guessElement.className = 'guess-item';
+    
+    let icon = '';
+    let className = '';
+    
+    if (result.correct) {
+        icon = '🎉';
+        className = 'correct';
+    } else if (guess > gameData.targetNumber) {
+        icon = '📉';
+        className = 'too-high';
+    } else {
+        icon = '📈';
+        className = 'too-low';
+    }
+    
+    guessElement.innerHTML = `
+        <span class="guess-number ${className}">${guess}</span>
+        <span class="guess-icon">${icon}</span>
+    `;
+    
+    historyDiv.appendChild(guessElement);
+}
+
+function endGame(won) {
+    gameData.gameActive = false;
+    
+    document.getElementById('gamePlay').classList.add('hidden');
+    document.getElementById('gameOver').classList.remove('hidden');
+    
+    const resultIcon = document.getElementById('resultIcon');
+    const resultMessage = document.getElementById('resultMessage');
+    const resultDetails = document.getElementById('resultDetails');
+    
+    if (won) {
+        resultIcon.textContent = '🏆';
+        resultMessage.textContent = 'Congratulations!';
+        resultDetails.textContent = `You guessed the number ${gameData.targetNumber} in ${gameData.guesses.length} attempt(s)!`;
+    } else {
+        resultIcon.textContent = '💀';
+        resultMessage.textContent = 'Game Over!';
+        resultDetails.textContent = `The number was ${gameData.targetNumber}. Better luck next time!`;
+    }
+}
+
+function resetGame() {
+    document.getElementById('gameSetup').classList.remove('hidden');
+    document.getElementById('gamePlay').classList.add('hidden');
+    document.getElementById('gameOver').classList.add('hidden');
+    
+    gameData = {
+        targetNumber: 0,
+        remainingChances: 0,
+        maxChances: 0,
+        guesses: [],
+        gameActive: false
+    };
+}
+
+// Allow Enter key to make guess
+document.addEventListener('DOMContentLoaded', function() {
+    const guessInput = document.getElementById('guessInput');
+    if (guessInput) {
+        guessInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makeGuess();
+            }
+        });
+    }
+});
+</script>

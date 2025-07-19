@@ -1,0 +1,119 @@
+<div class="calculator-demo">
+    <h3>🧮 Interactive Calculator</h3>
+    <p>Try out the calculator with basic arithmetic operations!</p>
+    
+    <div class="calculator">
+        <div class="calculator-display">
+            <input type="text" id="calcDisplay" readonly placeholder="0">
+        </div>
+        
+        <div class="calculator-buttons">
+            <button class="calc-btn calc-clear" onclick="clearCalculator()">C</button>
+            <button class="calc-btn calc-operator" onclick="setOperation('/')">/</button>
+            <button class="calc-btn calc-operator" onclick="setOperation('*')">×</button>
+            <button class="calc-btn calc-operator" onclick="setOperation('-')">-</button>
+            
+            <button class="calc-btn calc-number" onclick="appendNumber('7')">7</button>
+            <button class="calc-btn calc-number" onclick="appendNumber('8')">8</button>
+            <button class="calc-btn calc-number" onclick="appendNumber('9')">9</button>
+            <button class="calc-btn calc-operator" onclick="setOperation('+')">+</button>
+            
+            <button class="calc-btn calc-number" onclick="appendNumber('4')">4</button>
+            <button class="calc-btn calc-number" onclick="appendNumber('5')">5</button>
+            <button class="calc-btn calc-number" onclick="appendNumber('6')">6</button>
+            <button class="calc-btn calc-equals" onclick="calculate()" rowspan="2">=</button>
+            
+            <button class="calc-btn calc-number" onclick="appendNumber('1')">1</button>
+            <button class="calc-btn calc-number" onclick="appendNumber('2')">2</button>
+            <button class="calc-btn calc-number" onclick="appendNumber('3')">3</button>
+            
+            <button class="calc-btn calc-number calc-zero" onclick="appendNumber('0')">0</button>
+            <button class="calc-btn calc-number" onclick="appendNumber('.')">.</button>
+        </div>
+    </div>
+    
+    <div class="demo-info">
+        <h4>How to use:</h4>
+        <ul>
+            <li>Click numbers to build your calculation</li>
+            <li>Use +, -, ×, / for operations</li>
+            <li>Press = to get the result</li>
+            <li>Press C to clear</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+let currentInput = '';
+let operation = '';
+let previousInput = '';
+
+function appendNumber(number) {
+    const display = document.getElementById('calcDisplay');
+    if (currentInput === '0' && number !== '.') {
+        currentInput = number;
+    } else {
+        currentInput += number;
+    }
+    display.value = currentInput;
+}
+
+function setOperation(op) {
+    if (currentInput === '') return;
+    
+    if (previousInput !== '' && operation !== '') {
+        calculate();
+    }
+    
+    operation = op;
+    previousInput = currentInput;
+    currentInput = '';
+}
+
+function calculate() {
+    if (previousInput === '' || currentInput === '' || operation === '') return;
+    
+    const num1 = parseFloat(previousInput);
+    const num2 = parseFloat(currentInput);
+    
+    fetch('/api/calculator', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            num1: num1,
+            num2: num2,
+            operation: operation
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            document.getElementById('calcDisplay').value = 'Error';
+            setTimeout(() => clearCalculator(), 1500);
+        } else {
+            const result = data.result;
+            document.getElementById('calcDisplay').value = result;
+            currentInput = result.toString();
+            previousInput = '';
+            operation = '';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('calcDisplay').value = 'Error';
+        setTimeout(() => clearCalculator(), 1500);
+    });
+}
+
+function clearCalculator() {
+    currentInput = '';
+    previousInput = '';
+    operation = '';
+    document.getElementById('calcDisplay').value = '0';
+}
+
+// Initialize calculator
+clearCalculator();
+</script>

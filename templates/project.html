@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }} - Maxwell's Python Projects{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="breadcrumb">
+    <div class="container">
+        <a href="{{ url_for('home') }}">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">{{ project.title }}</span>
+    </div>
+</nav>
+
+<!-- Project Header -->
+<section class="project-header">
+    <div class="container">
+        <div class="project-hero">
+            <div class="project-icon-large">
+                {{ project.icon }}
+            </div>
+            <div class="project-info">
+                <h1 class="project-title">{{ project.title }}</h1>
+                <p class="project-description">{{ project.description }}</p>
+                <div class="project-badges">
+                    <span class="difficulty-badge difficulty-{{ project.difficulty.lower() }}">
+                        {{ project.difficulty }}
+                    </span>
+                    {% for tech in project.technologies %}
+                    <span class="tech-tag">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Project Demo -->
+<section class="project-demo">
+    <div class="container">
+        <div class="demo-controls">
+            <button class="tab-btn active" data-tab="demo">
+                <i class="fas fa-play"></i> Interactive Demo
+            </button>
+            <button class="tab-btn" data-tab="code">
+                <i class="fas fa-code"></i> Source Code
+            </button>
+            <button class="tab-btn" data-tab="explanation">
+                <i class="fas fa-book"></i> How It Works
+            </button>
+        </div>
+
+        <!-- Demo Tab -->
+        <div class="tab-content active" id="demo">
+            <div class="demo-container">
+                {% if project_id == 'calculator' %}
+                    {% include 'demos/calculator.html' %}
+                {% elif project_id == 'password-generator' %}
+                    {% include 'demos/password_generator.html' %}
+                {% elif project_id == 'number-guessing' %}
+                    {% include 'demos/number_guessing.html' %}
+                {% elif project_id == 'rock-paper-scissors' %}
+                    {% include 'demos/rock_paper_scissors.html' %}
+                {% elif project_id == 'blackjack' %}
+                    {% include 'demos/blackjack.html' %}
+                {% elif project_id == 'hangman' %}
+                    {% include 'demos/hangman.html' %}
+                {% elif project_id == 'caesar-cipher' %}
+                    {% include 'demos/caesar_cipher.html' %}
+                {% elif project_id == 'higher-lower' %}
+                    {% include 'demos/higher_lower.html' %}
+                {% elif project_id == 'coffee-machine' %}
+                    {% include 'demos/coffee_machine.html' %}
+                {% elif project_id == 'secret-auction' %}
+                    {% include 'demos/secret_auction.html' %}
+                {% else %}
+                    <div class="demo-placeholder">
+                        <i class="fas fa-tools"></i>
+                        <h3>Demo Coming Soon!</h3>
+                        <p>This interactive demo is currently being developed. Check back soon!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Code Tab -->
+        <div class="tab-content" id="code">
+            <div class="code-container">
+                <div class="code-header">
+                    <h3>{{ project.title }} - Python Source Code</h3>
+                    <button class="btn btn-sm" onclick="copyCode()">
+                        <i class="fas fa-copy"></i> Copy Code
+                    </button>
+                </div>
+                <pre><code class="language-python" id="sourceCode">{{ source_code }}</code></pre>
+            </div>
+        </div>
+
+        <!-- Explanation Tab -->
+        <div class="tab-content" id="explanation">
+            <div class="explanation-container">
+                <h3>How {{ project.title }} Works</h3>
+                {% if project_id == 'calculator' %}
+                <div class="explanation-content">
+                    <h4>Key Concepts:</h4>
+                    <ul>
+                        <li><strong>Functions:</strong> Separate functions for each operation (add, subtract, multiply, divide)</li>
+                        <li><strong>User Input:</strong> Getting numbers and operations from the user</li>
+                        <li><strong>Conditional Logic:</strong> Using if/elif statements to handle different operations</li>
+                        <li><strong>Error Handling:</strong> Preventing division by zero</li>
+                    </ul>
+                    <h4>What I Learned:</h4>
+                    <p>This was one of my first Python projects! I learned how to break down a problem into smaller functions, handle user input, and implement basic error checking.</p>
+                </div>
+                {% elif project_id == 'password-generator' %}
+                <div class="explanation-content">
+                    <h4>Key Concepts:</h4>
+                    <ul>
+                        <li><strong>Lists:</strong> Storing different character types in separate lists</li>
+                        <li><strong>Random Module:</strong> Using random.choice() to select characters</li>
+                        <li><strong>List Comprehension:</strong> Generating password characters efficiently</li>
+                        <li><strong>String Methods:</strong> Joining list elements into a final password</li>
+                    </ul>
+                    <h4>What I Learned:</h4>
+                    <p>This project taught me about working with lists, the random module, and how to create flexible, customizable functions.</p>
+                </div>
+                {% else %}
+                <div class="explanation-content">
+                    <h4>Explanation Coming Soon!</h4>
+                    <p>Detailed explanation of how this project works will be added soon. Check back later!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Navigation -->
+<section class="project-navigation">
+    <div class="container">
+        <div class="nav-buttons">
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Projects
+            </a>
+            <a href="https://github.com/maxwellrubert" target="_blank" class="btn btn-primary">
+                <i class="fab fa-github"></i> View on GitHub
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.dataset.tab;
+            
+            // Remove active class from all tabs and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
+        });
+    });
+
+    // Copy code functionality
+    function copyCode() {
+        const codeElement = document.getElementById('sourceCode');
+        const textArea = document.createElement('textarea');
+        textArea.value = codeElement.textContent;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        // Show feedback
+        const copyBtn = event.target.closest('button');
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+        }, 2000);
+    }
+
+    // Check for hash in URL to auto-open code tab
+    window.addEventListener('load', function() {
+        if (window.location.hash === '#code') {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Activate code tab
+            document.querySelector('[data-tab="code"]').classList.add('active');
+            document.getElementById('code').classList.add('active');
+        }
+    });
+</script>
+{% endblock %}

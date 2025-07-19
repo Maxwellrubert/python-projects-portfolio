@@ -1,0 +1,609 @@
+<div class="higher-lower-demo">
+    <h3>📊 Higher Lower Game</h3>
+    <p>Guess which option has more followers/popularity! Can you get a high score?</p>
+    
+    <div class="game-container">
+        <div class="game-setup" id="higherLowerSetup">
+            <h4>Welcome to Higher Lower!</h4>
+            <p>Compare social media accounts, countries, and more. Guess which one has higher numbers!</p>
+            <div class="difficulty-selection">
+                <h5>Choose Category:</h5>
+                <div class="category-buttons">
+                    <button class="category-btn" onclick="startHigherLower('social')">
+                        <i class="fab fa-instagram"></i>
+                        <span>Social Media</span>
+                        <small>Instagram followers</small>
+                    </button>
+                    <button class="category-btn" onclick="startHigherLower('countries')">
+                        <i class="fas fa-globe"></i>
+                        <span>Countries</span>
+                        <small>Population</small>
+                    </button>
+                    <button class="category-btn" onclick="startHigherLower('mixed')">
+                        <i class="fas fa-random"></i>
+                        <span>Mixed</span>
+                        <small>Various categories</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-play hidden" id="higherLowerPlay">
+            <div class="score-display">
+                <div class="current-score">Score: <span id="currentScore">0</span></div>
+                <div class="high-score">Best: <span id="highScore">0</span></div>
+            </div>
+            
+            <div class="comparison-area">
+                <div class="option-card" id="optionA">
+                    <div class="option-image">
+                        <span id="optionAIcon">📱</span>
+                    </div>
+                    <div class="option-info">
+                        <h4 id="optionAName">Loading...</h4>
+                        <p id="optionADescription">Description</p>
+                        <div class="follower-count">
+                            <span id="optionACount">???</span>
+                            <span id="optionAUnit">followers</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vs-section">
+                    <div class="vs-text">VS</div>
+                    <div class="category-info">
+                        <span id="currentCategory">Social Media</span>
+                    </div>
+                </div>
+                
+                <div class="option-card" id="optionB">
+                    <div class="option-image">
+                        <span id="optionBIcon">📱</span>
+                    </div>
+                    <div class="option-info">
+                        <h4 id="optionBName">Loading...</h4>
+                        <p id="optionBDescription">Description</p>
+                        <div class="guess-buttons">
+                            <button class="guess-btn btn-higher" onclick="makeGuess('higher')">
+                                <i class="fas fa-arrow-up"></i>
+                                Higher
+                            </button>
+                            <button class="guess-btn btn-lower" onclick="makeGuess('lower')">
+                                <i class="fas fa-arrow-down"></i>
+                                Lower
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-message" id="gameMessage"></div>
+            
+            <button class="btn btn-secondary" onclick="resetHigherLower()" id="resetBtn">
+                <i class="fas fa-redo"></i> New Game
+            </button>
+        </div>
+        
+        <div class="game-over hidden" id="higherLowerOver">
+            <div class="final-result">
+                <div class="final-score">
+                    <h3>Game Over!</h3>
+                    <div class="score-summary">
+                        <div>Final Score: <strong id="finalScore">0</strong></div>
+                        <div id="newRecord" class="new-record hidden">🎉 New Record!</div>
+                    </div>
+                </div>
+                <div class="correct-answer">
+                    <span id="correctAnswerText"></span>
+                </div>
+                <button class="btn btn-primary" onclick="resetHigherLower()">
+                    <i class="fas fa-play"></i> Play Again
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="demo-info">
+        <h4>How to Play:</h4>
+        <ul>
+            <li>Compare two options and guess which has higher numbers</li>
+            <li>Click "Higher" if you think B has more than A</li>
+            <li>Click "Lower" if you think B has less than A</li>
+            <li>Each correct guess increases your score</li>
+            <li>One wrong guess ends the game!</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+const gameData = {
+    social: [
+        { name: "Instagram", description: "Photo sharing platform", count: 2000, icon: "📱", unit: "million followers" },
+        { name: "TikTok", description: "Short video platform", count: 1500, icon: "🎵", unit: "million users" },
+        { name: "YouTube", description: "Video platform", count: 2700, icon: "📺", unit: "million users" },
+        { name: "Facebook", description: "Social network", count: 2900, icon: "👥", unit: "million users" },
+        { name: "Twitter", description: "Microblogging platform", count: 450, icon: "🐦", unit: "million users" },
+        { name: "LinkedIn", description: "Professional network", count: 900, icon: "💼", unit: "million users" },
+        { name: "Snapchat", description: "Multimedia messaging", count: 750, icon: "👻", unit: "million users" },
+        { name: "Pinterest", description: "Visual discovery", count: 450, icon: "📌", unit: "million users" }
+    ],
+    countries: [
+        { name: "China", description: "Most populous country", count: 1440, icon: "🇨🇳", unit: "million people" },
+        { name: "India", description: "Second most populous", count: 1380, icon: "🇮🇳", unit: "million people" },
+        { name: "United States", description: "Third most populous", count: 331, icon: "🇺🇸", unit: "million people" },
+        { name: "Indonesia", description: "Southeast Asian nation", count: 273, icon: "🇮🇩", unit: "million people" },
+        { name: "Pakistan", description: "South Asian country", count: 225, icon: "🇵🇰", unit: "million people" },
+        { name: "Brazil", description: "Largest South American country", count: 215, icon: "🇧🇷", unit: "million people" },
+        { name: "Nigeria", description: "Most populous African country", count: 206, icon: "🇳🇬", unit: "million people" },
+        { name: "Bangladesh", description: "South Asian nation", count: 165, icon: "🇧🇩", unit: "million people" }
+    ],
+    mixed: [
+        { name: "McDonald's", description: "Fast food chain", count: 39000, icon: "🍔", unit: "restaurants worldwide" },
+        { name: "Starbucks", description: "Coffee chain", count: 33000, icon: "☕", unit: "stores worldwide" },
+        { name: "iPhone", description: "Apple smartphone", count: 1200, icon: "📱", unit: "million sold annually" },
+        { name: "PlayStation", description: "Gaming console", count: 116, icon: "🎮", unit: "million units sold" },
+        { name: "Netflix", description: "Streaming service", count: 230, icon: "📺", unit: "million subscribers" },
+        { name: "Spotify", description: "Music streaming", count: 180, icon: "🎵", unit: "million users" }
+    ]
+};
+
+let higherLowerGame = {
+    currentCategory: 'social',
+    availableOptions: [],
+    optionA: null,
+    optionB: null,
+    score: 0,
+    highScore: parseInt(localStorage.getItem('higherLowerHighScore') || '0'),
+    gameActive: false
+};
+
+function startHigherLower(category) {
+    higherLowerGame.currentCategory = category;
+    higherLowerGame.availableOptions = [...gameData[category]];
+    higherLowerGame.score = 0;
+    higherLowerGame.gameActive = true;
+    
+    // Show high score
+    document.getElementById('highScore').textContent = higherLowerGame.highScore;
+    document.getElementById('currentScore').textContent = '0';
+    
+    document.getElementById('higherLowerSetup').classList.add('hidden');
+    document.getElementById('higherLowerPlay').classList.remove('hidden');
+    document.getElementById('higherLowerOver').classList.add('hidden');
+    
+    document.getElementById('currentCategory').textContent = getCategoryName(category);
+    
+    setupNewRound();
+}
+
+function getCategoryName(category) {
+    const names = {
+        social: 'Social Media',
+        countries: 'Countries', 
+        mixed: 'Mixed Categories'
+    };
+    return names[category] || 'Unknown';
+}
+
+function setupNewRound() {
+    if (higherLowerGame.availableOptions.length < 2) {
+        // Refresh available options if running low
+        higherLowerGame.availableOptions = [...gameData[higherLowerGame.currentCategory]];
+    }
+    
+    // Keep option B as new option A (for continuity)
+    if (higherLowerGame.optionB) {
+        higherLowerGame.optionA = higherLowerGame.optionB;
+    } else {
+        // First round
+        const indexA = Math.floor(Math.random() * higherLowerGame.availableOptions.length);
+        higherLowerGame.optionA = higherLowerGame.availableOptions.splice(indexA, 1)[0];
+    }
+    
+    // Select new option B
+    const indexB = Math.floor(Math.random() * higherLowerGame.availableOptions.length);
+    higherLowerGame.optionB = higherLowerGame.availableOptions.splice(indexB, 1)[0];
+    
+    updateDisplay();
+}
+
+function updateDisplay() {
+    // Update option A
+    document.getElementById('optionAIcon').textContent = higherLowerGame.optionA.icon;
+    document.getElementById('optionAName').textContent = higherLowerGame.optionA.name;
+    document.getElementById('optionADescription').textContent = higherLowerGame.optionA.description;
+    document.getElementById('optionACount').textContent = formatNumber(higherLowerGame.optionA.count);
+    document.getElementById('optionAUnit').textContent = higherLowerGame.optionA.unit;
+    
+    // Update option B (hide count)
+    document.getElementById('optionBIcon').textContent = higherLowerGame.optionB.icon;
+    document.getElementById('optionBName').textContent = higherLowerGame.optionB.name;
+    document.getElementById('optionBDescription').textContent = higherLowerGame.optionB.description;
+    
+    // Enable buttons
+    document.querySelectorAll('.guess-btn').forEach(btn => btn.disabled = false);
+}
+
+function formatNumber(num) {
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+}
+
+function makeGuess(guess) {
+    if (!higherLowerGame.gameActive) return;
+    
+    const isHigher = higherLowerGame.optionB.count > higherLowerGame.optionA.count;
+    const correct = (guess === 'higher' && isHigher) || (guess === 'lower' && !isHigher);
+    
+    // Disable buttons
+    document.querySelectorAll('.guess-btn').forEach(btn => btn.disabled = true);
+    
+    // Show correct answer
+    showResult(correct);
+    
+    if (correct) {
+        higherLowerGame.score++;
+        document.getElementById('currentScore').textContent = higherLowerGame.score;
+        
+        setTimeout(() => {
+            setupNewRound();
+            document.getElementById('gameMessage').textContent = '';
+        }, 2000);
+    } else {
+        setTimeout(() => {
+            endGame();
+        }, 2000);
+    }
+}
+
+function showResult(correct) {
+    const optionBCount = formatNumber(higherLowerGame.optionB.count);
+    const optionBUnit = higherLowerGame.optionB.unit;
+    
+    // Show the actual count for option B
+    const optionBCard = document.getElementById('optionB');
+    const countDisplay = document.createElement('div');
+    countDisplay.className = 'revealed-count';
+    countDisplay.innerHTML = `
+        <span class="count-number">${optionBCount}</span>
+        <span class="count-unit">${optionBUnit}</span>
+    `;
+    
+    // Add it to option B
+    const optionInfo = optionBCard.querySelector('.option-info');
+    optionInfo.appendChild(countDisplay);
+    
+    // Show message
+    const message = correct ? 
+        '🎉 Correct! Well done!' : 
+        '❌ Wrong! Game over!';
+    
+    document.getElementById('gameMessage').textContent = message;
+    document.getElementById('gameMessage').className = `game-message ${correct ? 'correct' : 'wrong'}`;
+}
+
+function endGame() {
+    higherLowerGame.gameActive = false;
+    
+    // Check for high score
+    let newRecord = false;
+    if (higherLowerGame.score > higherLowerGame.highScore) {
+        higherLowerGame.highScore = higherLowerGame.score;
+        localStorage.setItem('higherLowerHighScore', higherLowerGame.highScore.toString());
+        newRecord = true;
+    }
+    
+    document.getElementById('higherLowerPlay').classList.add('hidden');
+    document.getElementById('higherLowerOver').classList.remove('hidden');
+    
+    document.getElementById('finalScore').textContent = higherLowerGame.score;
+    document.getElementById('correctAnswerText').textContent = 
+        `${higherLowerGame.optionB.name} has ${formatNumber(higherLowerGame.optionB.count)} ${higherLowerGame.optionB.unit}`;
+    
+    if (newRecord) {
+        document.getElementById('newRecord').classList.remove('hidden');
+    }
+}
+
+function resetHigherLower() {
+    document.getElementById('higherLowerSetup').classList.remove('hidden');
+    document.getElementById('higherLowerPlay').classList.add('hidden');
+    document.getElementById('higherLowerOver').classList.add('hidden');
+    document.getElementById('newRecord').classList.add('hidden');
+    
+    document.getElementById('gameMessage').textContent = '';
+    document.getElementById('gameMessage').className = 'game-message';
+    
+    // Remove any revealed counts
+    document.querySelectorAll('.revealed-count').forEach(el => el.remove());
+    
+    higherLowerGame = {
+        currentCategory: 'social',
+        availableOptions: [],
+        optionA: null,
+        optionB: null,
+        score: 0,
+        highScore: parseInt(localStorage.getItem('higherLowerHighScore') || '0'),
+        gameActive: false
+    };
+}
+</script>
+
+<style>
+.score-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+}
+
+.current-score, .high-score {
+    font-weight: 600;
+    font-size: 1.125rem;
+}
+
+.current-score {
+    color: var(--primary-color);
+}
+
+.high-score {
+    color: var(--warning-color);
+}
+
+.comparison-area {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.option-card {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    text-align: center;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.option-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+}
+
+.option-image {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.option-info h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.option-info p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.follower-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.follower-count span {
+    display: block;
+}
+
+.follower-count .count-unit {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.vs-section {
+    text-align: center;
+    padding: 1rem;
+}
+
+.vs-text {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.category-info {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.guess-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.guess-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-higher {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-higher:hover:not(:disabled) {
+    background-color: #16a34a;
+    transform: translateY(-2px);
+}
+
+.btn-lower {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-lower:hover:not(:disabled) {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+}
+
+.guess-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.revealed-count {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--primary-color);
+    animation: slideInUp 0.5s ease-out;
+}
+
+.count-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    display: block;
+}
+
+.count-unit {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.category-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.category-btn {
+    padding: 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background-color: var(--bg-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    min-width: 150px;
+}
+
+.category-btn:hover {
+    border-color: var(--primary-color);
+    background-color: var(--bg-secondary);
+}
+
+.category-btn i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.category-btn span {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.category-btn small {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.game-message {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    min-height: 2rem;
+    margin-bottom: 1rem;
+}
+
+.game-message.correct {
+    color: var(--success-color);
+}
+
+.game-message.wrong {
+    color: var(--danger-color);
+}
+
+.final-result {
+    text-align: center;
+    padding: 2rem;
+}
+
+.score-summary {
+    margin: 1rem 0;
+    font-size: 1.125rem;
+}
+
+.new-record {
+    color: var(--success-color);
+    font-weight: 700;
+    margin-top: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.correct-answer {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .comparison-area {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .category-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .category-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .guess-buttons {
+        flex-direction: column;
+    }
+}
+</style>

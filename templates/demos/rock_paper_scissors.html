@@ -1,0 +1,262 @@
+<div class="rps-demo">
+    <h3>✂️ Rock Paper Scissors</h3>
+    <p>Challenge the bot to a classic game of Rock Paper Scissors!</p>
+    
+    <div class="game-container">
+        <div class="game-area">
+            <div class="player-section">
+                <h4>Your Choice</h4>
+                <div class="choice-display" id="playerChoice">
+                    <div class="choice-placeholder">
+                        <i class="fas fa-hand-paper"></i>
+                        <p>Make your choice!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vs-section">
+                <div class="vs-text">VS</div>
+                <div class="game-result" id="gameResult"></div>
+            </div>
+            
+            <div class="bot-section">
+                <h4>Bot's Choice</h4>
+                <div class="choice-display" id="botChoice">
+                    <div class="choice-placeholder">
+                        <i class="fas fa-robot"></i>
+                        <p>Waiting...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="choice-buttons">
+            <button class="choice-btn" onclick="makeChoice('rock')" data-choice="rock">
+                <div class="choice-icon">✊</div>
+                <div class="choice-name">Rock</div>
+            </button>
+            <button class="choice-btn" onclick="makeChoice('paper')" data-choice="paper">
+                <div class="choice-icon">✋</div>
+                <div class="choice-name">Paper</div>
+            </button>
+            <button class="choice-btn" onclick="makeChoice('scissors')" data-choice="scissors">
+                <div class="choice-icon">✌️</div>
+                <div class="choice-name">Scissors</div>
+            </button>
+        </div>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <span class="score-label">You</span>
+                <span class="score-value" id="playerScore">0</span>
+            </div>
+            <div class="score-divider">-</div>
+            <div class="score-item">
+                <span class="score-label">Bot</span>
+                <span class="score-value" id="botScore">0</span>
+            </div>
+        </div>
+        
+        <button class="btn btn-secondary" onclick="resetScore()">
+            <i class="fas fa-redo"></i> Reset Score
+        </button>
+    </div>
+    
+    <div class="demo-info">
+        <h4>Rules:</h4>
+        <ul>
+            <li>Rock crushes Scissors</li>
+            <li>Scissors cuts Paper</li>
+            <li>Paper covers Rock</li>
+            <li>Same choice = Tie</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+let scores = { player: 0, bot: 0 };
+
+const choiceEmojis = {
+    rock: '✊',
+    paper: '✋',
+    scissors: '✌️'
+};
+
+const choiceArt = {
+    rock: `
+        ___
+    ---'   ____)
+          (_____)
+          (_____)
+          (____)
+    ---.__(___) `,
+    paper: `
+        ___
+    ---'   ____)____
+              ______)
+              _______)
+             _______)
+    ---.__________)`,
+    scissors: `
+        ___
+    ---'   ____)____
+              ______)
+           __________)
+          (____)
+    ---.__(___)
+    `
+};
+
+function makeChoice(playerChoice) {
+    // Disable buttons temporarily
+    const buttons = document.querySelectorAll('.choice-btn');
+    buttons.forEach(btn => btn.disabled = true);
+    
+    // Show loading state
+    document.getElementById('playerChoice').innerHTML = `
+        <div class="choice-selected">
+            <div class="choice-emoji">${choiceEmojis[playerChoice]}</div>
+            <div class="choice-text">${playerChoice.charAt(0).toUpperCase() + playerChoice.slice(1)}</div>
+        </div>
+    `;
+    
+    document.getElementById('botChoice').innerHTML = `
+        <div class="choice-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Bot is thinking...</p>
+        </div>
+    `;
+    
+    // Simulate thinking delay
+    setTimeout(() => {
+        fetch('/api/rock-paper-scissors', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                choice: playerChoice
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayResult(data);
+            updateScores(data.result);
+            
+            // Re-enable buttons
+            buttons.forEach(btn => btn.disabled = false);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error playing game. Please try again.');
+            buttons.forEach(btn => btn.disabled = false);
+        });
+    }, 1000);
+}
+
+function displayResult(data) {
+    // Show bot choice
+    document.getElementById('botChoice').innerHTML = `
+        <div class="choice-selected">
+            <div class="choice-emoji">${choiceEmojis[data.bot_choice]}</div>
+            <div class="choice-text">${data.bot_choice.charAt(0).toUpperCase() + data.bot_choice.slice(1)}</div>
+        </div>
+    `;
+    
+    // Show result
+    const resultElement = document.getElementById('gameResult');
+    let resultClass = '';
+    let resultIcon = '';
+    
+    switch(data.result) {
+        case 'win':
+            resultClass = 'result-win';
+            resultIcon = '🎉';
+            break;
+        case 'lose':
+            resultClass = 'result-lose';
+            resultIcon = '😔';
+            break;
+        case 'draw':
+            resultClass = 'result-draw';
+            resultIcon = '🤝';
+            break;
+    }
+    
+    resultElement.className = `game-result ${resultClass}`;
+    resultElement.innerHTML = `
+        <div class="result-icon">${resultIcon}</div>
+        <div class="result-text">${data.message}</div>
+    `;
+    
+    // Add animation
+    resultElement.style.animation = 'none';
+    setTimeout(() => {
+        resultElement.style.animation = 'bounce 0.6s ease-in-out';
+    }, 10);
+}
+
+function updateScores(result) {
+    if (result === 'win') {
+        scores.player++;
+    } else if (result === 'lose') {
+        scores.bot++;
+    }
+    
+    document.getElementById('playerScore').textContent = scores.player;
+    document.getElementById('botScore').textContent = scores.bot;
+    
+    // Add score animation
+    const scoreElements = [
+        document.getElementById('playerScore'),
+        document.getElementById('botScore')
+    ];
+    
+    scoreElements.forEach(el => {
+        el.style.animation = 'none';
+        setTimeout(() => {
+            el.style.animation = 'scoreUpdate 0.3s ease-in-out';
+        }, 10);
+    });
+}
+
+function resetScore() {
+    scores = { player: 0, bot: 0 };
+    document.getElementById('playerScore').textContent = '0';
+    document.getElementById('botScore').textContent = '0';
+    
+    // Reset displays
+    document.getElementById('playerChoice').innerHTML = `
+        <div class="choice-placeholder">
+            <i class="fas fa-hand-paper"></i>
+            <p>Make your choice!</p>
+        </div>
+    `;
+    
+    document.getElementById('botChoice').innerHTML = `
+        <div class="choice-placeholder">
+            <i class="fas fa-robot"></i>
+            <p>Waiting...</p>
+        </div>
+    `;
+    
+    document.getElementById('gameResult').innerHTML = '';
+    document.getElementById('gameResult').className = 'game-result';
+}
+
+// Add hover effects to choice buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const choiceButtons = document.querySelectorAll('.choice-btn');
+    choiceButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            if (!this.disabled) {
+                this.style.transform = 'scale(1.05)';
+            }
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>

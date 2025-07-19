@@ -1,0 +1,390 @@
+<div class="caesar-demo">
+    <h3>🔒 Caesar Cipher</h3>
+    <p>Encrypt and decrypt messages using the classic Caesar cipher technique!</p>
+    
+    <div class="cipher-container">
+        <div class="cipher-controls">
+            <div class="mode-selection">
+                <label>
+                    <input type="radio" name="mode" value="encrypt" checked>
+                    <span>🔐 Encrypt</span>
+                </label>
+                <label>
+                    <input type="radio" name="mode" value="decrypt">
+                    <span>🔓 Decrypt</span>
+                </label>
+            </div>
+            
+            <div class="shift-control">
+                <label for="shiftAmount">Shift Amount:</label>
+                <div class="shift-input">
+                    <input type="range" id="shiftAmount" min="1" max="25" value="3">
+                    <span id="shiftValue">3</span>
+                </div>
+            </div>
+            
+            <div class="text-input">
+                <label for="inputText">Enter your message:</label>
+                <textarea id="inputText" placeholder="Type your message here..." rows="4"></textarea>
+            </div>
+            
+            <button class="btn btn-primary" onclick="processCipher()">
+                <i class="fas fa-sync-alt"></i> Process Message
+            </button>
+        </div>
+        
+        <div class="cipher-output">
+            <h4>Result:</h4>
+            <div class="output-display">
+                <textarea id="outputText" readonly placeholder="Your result will appear here..." rows="4"></textarea>
+                <button class="copy-btn" onclick="copyResult()" title="Copy result">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            
+            <div class="cipher-info">
+                <div class="alphabet-display">
+                    <div class="alphabet-row">
+                        <strong>Original:</strong>
+                        <span id="originalAlphabet">ABCDEFGHIJKLMNOPQRSTUVWXYZ</span>
+                    </div>
+                    <div class="alphabet-row">
+                        <strong>Shifted:</strong>
+                        <span id="shiftedAlphabet">DEFGHIJKLMNOPQRSTUVWXYZABC</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="preset-examples">
+        <h4>Try These Examples:</h4>
+        <div class="example-buttons">
+            <button class="btn btn-sm btn-secondary" onclick="loadExample('HELLO WORLD', 3, 'encrypt')">
+                Encrypt "HELLO WORLD"
+            </button>
+            <button class="btn btn-sm btn-secondary" onclick="loadExample('KHOOR ZRUOG', 3, 'decrypt')">
+                Decrypt "KHOOR ZRUOG"
+            </button>
+            <button class="btn btn-sm btn-secondary" onclick="loadExample('THE QUICK BROWN FOX', 13, 'encrypt')">
+                ROT13 Example
+            </button>
+        </div>
+    </div>
+    
+    <div class="demo-info">
+        <h4>How Caesar Cipher Works:</h4>
+        <ul>
+            <li>Each letter is shifted by a fixed number of positions in the alphabet</li>
+            <li>For example, with shift 3: A→D, B→E, C→F, etc.</li>
+            <li>Numbers and special characters remain unchanged</li>
+            <li>ROT13 (shift 13) is a popular variant used online</li>
+            <li>To decrypt, shift in the opposite direction</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+// Update shift display
+document.getElementById('shiftAmount').addEventListener('input', function() {
+    const shift = parseInt(this.value);
+    document.getElementById('shiftValue').textContent = shift;
+    updateAlphabetDisplay(shift);
+});
+
+function updateAlphabetDisplay(shift) {
+    const original = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let shifted = '';
+    
+    for (let i = 0; i < 26; i++) {
+        const newIndex = (i + shift) % 26;
+        shifted += original[newIndex];
+    }
+    
+    document.getElementById('originalAlphabet').textContent = original;
+    document.getElementById('shiftedAlphabet').textContent = shifted;
+}
+
+function caesarCipher(text, shift, encrypt = true) {
+    if (!encrypt) shift = -shift;
+    
+    return text.split('').map(char => {
+        if (char.match(/[A-Z]/)) {
+            return String.fromCharCode((char.charCodeAt(0) - 65 + shift + 26) % 26 + 65);
+        } else if (char.match(/[a-z]/)) {
+            return String.fromCharCode((char.charCodeAt(0) - 97 + shift + 26) % 26 + 97);
+        }
+        return char; // Keep numbers, spaces, and special characters unchanged
+    }).join('');
+}
+
+function processCipher() {
+    const inputText = document.getElementById('inputText').value;
+    const shift = parseInt(document.getElementById('shiftAmount').value);
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    
+    if (!inputText.trim()) {
+        alert('Please enter a message to process!');
+        return;
+    }
+    
+    const isEncrypt = mode === 'encrypt';
+    const result = caesarCipher(inputText, shift, isEncrypt);
+    
+    document.getElementById('outputText').value = result;
+    
+    // Add some visual feedback
+    const outputDiv = document.querySelector('.output-display');
+    outputDiv.style.animation = 'none';
+    setTimeout(() => {
+        outputDiv.style.animation = 'fadeIn 0.5s ease-in-out';
+    }, 10);
+}
+
+function copyResult() {
+    const outputText = document.getElementById('outputText');
+    if (outputText.value === '') {
+        alert('No result to copy!');
+        return;
+    }
+    
+    outputText.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const copyBtn = document.querySelector('.copy-btn');
+    const originalHTML = copyBtn.innerHTML;
+    copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+    copyBtn.style.color = '#4CAF50';
+    
+    setTimeout(() => {
+        copyBtn.innerHTML = originalHTML;
+        copyBtn.style.color = '';
+    }, 1500);
+}
+
+function loadExample(text, shift, mode) {
+    document.getElementById('inputText').value = text;
+    document.getElementById('shiftAmount').value = shift;
+    document.getElementById('shiftValue').textContent = shift;
+    document.querySelector(`input[name="mode"][value="${mode}"]`).checked = true;
+    
+    updateAlphabetDisplay(shift);
+    processCipher();
+}
+
+// Initialize alphabet display
+updateAlphabetDisplay(3);
+
+// Auto-process when mode changes
+document.querySelectorAll('input[name="mode"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (document.getElementById('inputText').value.trim()) {
+            processCipher();
+        }
+    });
+});
+
+// Auto-process when shift changes (with debounce)
+let shiftTimeout;
+document.getElementById('shiftAmount').addEventListener('input', function() {
+    clearTimeout(shiftTimeout);
+    shiftTimeout = setTimeout(() => {
+        if (document.getElementById('inputText').value.trim()) {
+            processCipher();
+        }
+    }, 300);
+});
+</script>
+
+<style>
+.cipher-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.cipher-controls, .cipher-output {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+}
+
+.mode-selection {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+}
+
+.mode-selection label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: var(--bg-secondary);
+}
+
+.mode-selection label:has(input:checked) {
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.mode-selection input[type="radio"] {
+    display: none;
+}
+
+.shift-control {
+    margin-bottom: 1.5rem;
+}
+
+.shift-control label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.shift-input {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.shift-input input[type="range"] {
+    flex: 1;
+}
+
+#shiftValue {
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 30px;
+    text-align: center;
+    font-size: 1.125rem;
+}
+
+.text-input {
+    margin-bottom: 1.5rem;
+}
+
+.text-input label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.text-input textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: 'Monaco', 'Consolas', monospace;
+    resize: vertical;
+}
+
+.cipher-output h4 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.output-display {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.output-display textarea {
+    width: 100%;
+    padding: 0.75rem 3rem 0.75rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: 'Monaco', 'Consolas', monospace;
+    resize: vertical;
+}
+
+.output-display .copy-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.3s ease;
+}
+
+.output-display .copy-btn:hover {
+    color: var(--primary-color);
+    background-color: var(--bg-primary);
+}
+
+.alphabet-display {
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.alphabet-row {
+    margin-bottom: 0.5rem;
+    word-spacing: 0.1em;
+    letter-spacing: 0.1em;
+}
+
+.alphabet-row:last-child {
+    margin-bottom: 0;
+}
+
+.alphabet-row strong {
+    display: inline-block;
+    width: 80px;
+    color: var(--text-primary);
+}
+
+.preset-examples {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.preset-examples h4 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.example-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .cipher-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .mode-selection {
+        flex-direction: column;
+    }
+    
+    .example-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .example-buttons .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+}
+</style>
