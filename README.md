@@ -1,4 +1,4 @@
-# 🐍 Maxwell's Python Projects Portfolio
+# Maxwell's Python Projects Portfolio
 
 A modern, interactive web portfolio showcasing Python programming projects with live demos, source code viewing, and responsive design.
 
@@ -7,11 +7,11 @@ A modern, interactive web portfolio showcasing Python programming projects with 
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Vercel](https://img.shields.io/badge/Deploy-Vercel-black.svg)
 
-## 🌟 Live Demo
+## Live Demo
 
 � **[View Live Portfolio](https://your-portfolio-url.vercel.app)**
 
-## ✨ Features
+## Features
 
 - **Interactive Demos**: Try each project directly in your browser
 - **Responsive Design**: Works perfectly on desktop and mobile
@@ -20,7 +20,7 @@ A modern, interactive web portfolio showcasing Python programming projects with 
 - **Project Filtering**: Search and filter projects by difficulty and technology
 - **Source Code Viewer**: View the original Python code for each project
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 MyWorksApp/
@@ -47,7 +47,7 @@ MyWorksApp/
     └── ... (other projects)
 ```
 
-## 🛠️ Setup Instructions
+## Setup Instructions
 
 ### Prerequisites
 - Python 3.7 or higher
@@ -89,7 +89,7 @@ MyWorksApp/
    http://localhost:5000
    ```
 
-## 🎮 Available Projects
+## Available Projects
 
 1. **Calculator** - Basic arithmetic operations with a modern interface
 2. **Password Generator** - Secure password creation with customizable options
@@ -102,7 +102,7 @@ MyWorksApp/
 9. **Coffee Machine** - Virtual coffee ordering system
 10. **Secret Auction** - Blind bidding system
 
-## 🌐 Deployment Options
+## Deployment Options
 
 This Flask application can be deployed to various platforms:
 
@@ -117,7 +117,7 @@ This Flask application can be deployed to various platforms:
 - **Heroku**: Classic platform (paid plans)
 - **Railway**: Modern deployment platform
 
-## 🎨 Customization
+## Customization
 
 ### Colors and Themes
 Edit CSS variables in `static/css/style.css`:
@@ -153,7 +153,7 @@ python app.py
 - **Styling**: CSS Grid/Flexbox for responsive layout
 - **Interactivity**: Fetch API for seamless demo experience
 
-## 📱 Mobile Support
+## Mobile Support
 
 The website is fully responsive and works great on:
 - Desktop computers
@@ -161,15 +161,15 @@ The website is fully responsive and works great on:
 - Mobile phones
 - Various screen sizes
 
-## 🤝 Contributing
+## Contributing
 
 This is a personal portfolio project, but suggestions and improvements are welcome!
 
-## 📄 License
+## License
 
 This project is for educational purposes. Feel free to use as inspiration for your own portfolio!
 
-## 👨‍💻 About
+## About
 
 Created by **Maxwell Rubert** as a showcase of beginner Python programming skills.
 
