@@ -9,7 +9,7 @@ A modern, interactive web portfolio showcasing Python programming projects with 
 
 ## Live Demo
 
-� **[View Live Portfolio](https://your-portfolio-url.vercel.app)**
+� **[View Live Portfolio](https://maxwellpyprojects.vercel.app)**
 
 ## Features
 
