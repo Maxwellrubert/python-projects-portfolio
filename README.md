@@ -178,7 +178,7 @@ Created by **Maxwell Rubert** as a showcase of beginner Python programming skill
 - HTML5 & CSS3
 - Vanilla JavaScript
 - Font Awesome Icons.
-- Google Fonts (Poppins)
+- Google Fonts
 
 ---
 
